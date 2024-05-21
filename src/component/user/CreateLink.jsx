@@ -1,25 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Box, Button, Fade, Modal, TextField, Typography } from '@mui/material';
+import { Box, Fade, Modal, TextField, } from '@mui/material';
 import { makeApi } from '../../helper/MakeApi';
 import ShowDocument from './ShowDocument';
 import ShareLinkModal from './ShareLinkModal';
 import WhatsappShare from './WhatsappShare';
 import Loader from '../Loader';
-import '../../assets/css/modal.css'
-
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
+import dayjs from 'dayjs';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import '../../assets/css/modal.css';
 
 const CreateLink = () => {
   const [user, setUser] = useState([]);
@@ -42,7 +34,6 @@ const CreateLink = () => {
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [selectedWhatsAppId, setSelectedWhatsAppId] = useState('')
 
-
   //get previos link
   const getUserList = async () => {
     try {
@@ -63,26 +54,16 @@ const CreateLink = () => {
   }, [])
 
   // these state is for creating link
-  const [formData, setFormData] = useState({
-    link_name: '',
-    expiry_date: '',
-  });
-
-  //handlchange function for creating link
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((oldVal) => ({
-      ...oldVal,
-      [name]: value
-
-    }))
-  }
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [link_name, setLink_name] = useState("");
 
   //handle submit form for creating link
   const createLink = async (e) => {
     e.preventDefault();
     setLoading(true)
     try {
+      const formattedDate = dayjs(selectedDate).format('YYYY-MM-DD');
+      const formData = { link_name: link_name, expiry_date: formattedDate }
       const createData = await makeApi('post', '/v1/user/create/link', formData);
       console.log("createData", createData);
       if (createData.hasError === true) {
@@ -90,13 +71,14 @@ const CreateLink = () => {
       }
       else {
         toast.success("link created successfully")
-        setFormData(" ")
+        setLink_name("");
+        setSelectedDate(null);
         closeCreateLinkModal(true)
         getUserList();
       }
     } catch (error) {
       console.log(error);
-      // toast.error(error.response.data.message)
+      toast.error(error);
     } finally {
       setLoading(false)
     }
@@ -131,6 +113,7 @@ const CreateLink = () => {
   const [openModalCreateLink, setModalCreateLink] = useState(false);
   const openCreateLinkModal = () => setModalCreateLink(true);
   const closeCreateLinkModal = () => setModalCreateLink(false);
+
 
   return (
     <>
@@ -217,24 +200,27 @@ const CreateLink = () => {
           {/* modal creating link */}
           <div>
             <Modal open={openModalCreateLink} onClose={closeCreateLinkModal} >
-              <Box sx={style} className="shadow border-0 rounded">
+              <Box className="shadow border-0 rounded boxStyle">
                 <form onSubmit={createLink}>
                   <div className="card-body text-center p-2 ">
                     <h3 className="mb-4 fw-bold">Create Link</h3>
                     <TextField label="Link Name" variant="outlined" className=' w-100 mb-4 me-3'
                       name='link_name'
                       id="link_name"
-                      value={formData.link_name}
-                      onChange={handleChange}
+                      value={link_name}
+                      onChange={(e) => setLink_name(e.target.value)}
                     />
 
-                    <TextField label="Expiry Date" variant="outlined" className=' w-100 mb-4 me-3'
-                      placeholder='eg. 2024-04-25'
-                      name='expiry_date'
-                      id="expiry_date"
-                      value={formData.expiry_date}
-                      onChange={handleChange}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={['DatePicker', 'DatePicker']}>
+                        <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4 me-3'
+                          name='selectedDate'
+                          id="selectedDate"
+                          value={selectedDate ? selectedDate : null}
+                          onChange={(newValue) => setSelectedDate(newValue)}
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
 
                     <div className='d-flex justify-content-center'>
                       {loading ? (<Loader />) : (<button className="btn btn-primary d-block" type="submit">Create link</button>)}

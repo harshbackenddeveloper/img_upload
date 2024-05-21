@@ -31,7 +31,7 @@ const AllUserList = () => {
 
   const getUserList = async () => {
     try {
-      setLoading(true)
+      setLoading(true)       
       const userList = await makeApi('get', '/v1/get/users')
       console.log("userlist", userList)
       if (userList.hasError == true) {
