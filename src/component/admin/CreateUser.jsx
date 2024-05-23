@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { makeApi } from '../../helper/MakeApi';
 import Loader from '../Loader';
-import { TextField } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import dayjs from 'dayjs';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -13,24 +13,25 @@ const CreateUser = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [departmentList, setDepartmentList] = useState([]);
+    const [selectedDepartment, setSelectedDepartment] = useState('');
     const [userDetails, setUserDetails] = useState({
-        user_name: '',
-        first_name: '',
-        last_name: '',
+        surveyor_or_Firm_name: "",
+        last_name: "",
+        user_name: "",
+        password: "",
+        sla_number: "",
+        iiisla_number: "",
+        link_limit: "",
         space: "",
-        link_limit: '',
-        email: '',
-        password: '',
-        mobile: '',
-        pan_no: '',
-        gstn: '',
-        address: '',
-        remark: '',
+        email: "",
+        mobile: "",
+        address: "",
+        remark: "",
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
         setUserDetails((oldVal) => ({
             ...oldVal,
             [name]: value
@@ -43,7 +44,8 @@ const CreateUser = () => {
         setLoading(true)
         try {
             const formattedDate = dayjs(selectedDate).format('YYYY-MM-DD');
-            const formData = { ...userDetails, expiry_date: formattedDate }
+            const formData = { ...userDetails, expiry_date: formattedDate, department: selectedDepartment }
+            console.log("formData", formData)
             const registerUser = await makeApi('post', '/v1/createUser', formData);
             console.log("registerUser", registerUser);
             if (registerUser.hasError == true) {
@@ -60,6 +62,26 @@ const CreateUser = () => {
             setLoading(false)
         }
     }
+
+
+    //function to get user department list 
+    const getDepartmentList = async () => {
+        try {
+            const response = await makeApi("get", "/v1/departmentlist");
+            if (response.hasError === true) {
+                toast.error(response.error.message)
+            } else {
+                setDepartmentList(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        getDepartmentList()
+    }, []);
+
     return (
         <>
             <div className="container-fluid  vh-75 " style={{ backgroundColor: "#508bfc" }}>
@@ -72,10 +94,10 @@ const CreateUser = () => {
                                     <div className="row">
 
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                            <TextField variant="outlined" className='w-100' label="Surveyor name/ Firm name" placeholder='Surveyor name/ Firm name'
-                                                name='first_name'
-                                                id="first_name"
-                                                value={userDetails.first_name}
+                                            <TextField variant="outlined" className='w-100' label="Surveyor name/Firm name" placeholder='Surveyor name/ Firm name'
+                                                name='surveyor_or_Firm_name'
+                                                id="surveyor_or_Firm_name"
+                                                value={userDetails.surveyor_or_Firm_name}
                                                 onChange={handleChange}
                                             />
                                         </div>
@@ -161,31 +183,23 @@ const CreateUser = () => {
                                             />
                                         </div>
 
-                                        <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                            <TextField variant="outlined" className='w-100' label="Pan No." placeholder='Pan No.'
-                                                name='pan_no'
-                                                id="pan_no"
-                                                value={userDetails.pan_no}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
+
 
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                            <TextField variant="outlined" className='w-100' label="GSTN" placeholder='GSTN'
-                                                name='gstn'
-                                                id="gstn"
-                                                value={userDetails.gstn}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-
-                                        <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                            <TextField variant="outlined" className='w-100' label="Department" placeholder='Department'
-                                                name='department'
-                                                id="department"
-                                                value={userDetails.department}
-                                                onChange={handleChange}
-                                            />
+                                            <FormControl fullWidth>
+                                                <InputLabel >Department</InputLabel>
+                                                <Select
+                                                    labelId="demo-simple-select-label"
+                                                    id="demo-simple-select"
+                                                    value={selectedDepartment}
+                                                    label="Department"
+                                                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                                                >
+                                                    {departmentList.map((item) => (
+                                                        <MenuItem value={item.d_name} key={item.id}>{item.d_name}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
                                         </div>
 
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-3">

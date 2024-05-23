@@ -29,9 +29,14 @@ const SystemImages = () => {
             });
             formData.append("key", key);
             const response = await makeApi('post', "/v1/user/uploadFile", formData)
-            console.log("response ", response)
-            toast.success("images uploaded successfully");
-            navigate('/')
+            if (response.hasError == true) {
+                console.log("errror", response)
+                toast.error(response.error.message)
+            } else {
+                console.log("response ", response)
+                toast.success("images uploaded successfully");
+                navigate('/thankyou')
+            }
         } catch (error) {
             console.log(error)
         } finally {
@@ -41,15 +46,18 @@ const SystemImages = () => {
 
     return (
         <div>
-            
+
             <div className="container ">
                 <div className="row">
-                    <div className="col-lg-6 mx-auto mt-5">
+                    
+                    <div className="col-lg-12  mt-1">
                         <div className="card p-4 p-lg-5 p-md-5 p-sm-5 p-xl-5 p-xxl-5  shadow-lg border-1 d-flex justify-content-between  mt-5">
                             <h4 className='fw-bold mb-3 '>Choose file from you system</h4>
-                            <form onSubmit={handleSubmit} className='d-flex justify-content-between flex-wrap p-0'>
+                            <form onSubmit={handleSubmit} className='d-flex justify-content-between flex-wrap flex-column p-0'>
                                 <input type="file" className='mb-3' multiple onChange={handleImageChange} />
-                                {loading ? <Loader /> : <button className="btn btn-primary mb-3" type="submit">Upload </button>}
+                               <div>
+                               {loading ? <Loader /> : <button className="btn btn-primary mb-0 d-block" type="submit">Upload </button>}
+                               </div>
                             </form>
                         </div>
                     </div>

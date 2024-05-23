@@ -33,25 +33,63 @@ const CreateLink = () => {
   //state for whatsapp modal open and share details
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [selectedWhatsAppId, setSelectedWhatsAppId] = useState('')
+  const [allLinkDetails, setAllLinkDetails] = useState([])
 
   //get previos link
-  const getUserList = async () => {
+  const getLinkList = async () => {
+    setLoading(true)
     try {
-      const userList = await makeApi('get', '/v1/user/getLinkById')
-      console.log("user link created list ", userList);
-      // if (userList.hasError == true) {
-      //   toast.error(userList.error.message)
-      // } else {
-      setUser(userList.data)
-      // }
+      const LinkList = await makeApi('get', '/v1/user/getLinkById')
+      const allDetailsLiks = await makeApi('get', '/v1/user/getstorage');
+      setAllLinkDetails(allDetailsLiks.data)
+      // console.log("allDetailsLiks", allDetailsLiks.data);
+      console.log("user link created list ", LinkList);
+      if (LinkList.hasError == true) {
+        toast.error(LinkList.error.message)
+      } else {
+        setUser(LinkList.data)
+      }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    getUserList()
+    getLinkList()
   }, [])
+
+  console.log("allLinkDetails", allLinkDetails)
+
+  //function to copy url in clipboard
+  let copyURLToClipboard = (url) => {
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        toast.success('URL copied to clipboard');
+      })
+      .catch((error) => {
+        toast.error('Failed to copy URL', error);
+      });
+  };
+
+  //function to delete link
+  const deleteDocument = async (link_key) => {
+    console.log("deleted link id", link_key)
+    try {
+      const deleteLink = await makeApi('post', `/v1/user/destroy/link`, { key: link_key });
+      if (deleteLink.hasError === 'true') {
+        toast.error(deleteLink.error.message);
+      } else {
+        toast.success("Link delted successfully")
+        console.log("delte link", deleteLink);
+        getLinkList();
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
 
   // these state is for creating link
   const [selectedDate, setSelectedDate] = useState(null);
@@ -74,7 +112,7 @@ const CreateLink = () => {
         setLink_name("");
         setSelectedDate(null);
         closeCreateLinkModal(true)
-        getUserList();
+        getLinkList();
       }
     } catch (error) {
       console.log(error);
@@ -114,11 +152,13 @@ const CreateLink = () => {
   const openCreateLinkModal = () => setModalCreateLink(true);
   const closeCreateLinkModal = () => setModalCreateLink(false);
 
-
   return (
     <>
-      <div className='container'>
+      {loading ? <Loader /> : (<div className='container'>
         <div className="card shadow-lg border-1 p-3 mt-3">
+          <div>
+            <button>{allLinkDetails.linkstatus}</button>
+          </div>
           <div className='d-flex justify-content-end'>
             <button onClick={openCreateLinkModal} className='btn btn-primary mb-3' >Create Link</button>
           </div>
@@ -130,8 +170,10 @@ const CreateLink = () => {
                   <th scope="col">S.No</th>
                   <th scope="col">Link</th>
                   <th scope="col">URL</th>
+                  <th scope="col">Copy Link</th>
                   <th scope="col">Share</th>
                   <th scope="col">Show</th>
+                  <th scope="col">Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,10 +181,29 @@ const CreateLink = () => {
                 {user.map((item, index) => (
                   <tr key={item.id}>
                     <th scope="row" >{index + 1}</th>
+                    {console.log("jkjfhfjkfjk", item)}
                     <td>{item.link_name}</td>
                     <td>{item.link_url}</td>
-                    <td><button className='btn btn-success' onClick={() => shareDocumentLink(item.id)}>Share</button></td>
+                    <td><button onClick={() => copyURLToClipboard(item.link_url)}>Copy</button></td>
+                    <td><button className='btn btn-success' onClick={() => shareDocumentLink(item.id)}>{item.status === 0 ? "Share" : "Expired"}</button></td>
+                    {/* <td>
+                      <button
+                        className='btn btn-success'
+                        onClick={() => {
+                          if (item.status === 0) {
+                            shareDocumentLink(item.id);
+                          } else {
+                            // Link is expired, do nothing or show a message
+                            console.log("Link is expired. Cannot share.");
+                          }
+                        }}
+                        disabled={item.status !== 0}
+                      >
+                        {item.status === 0 ? "Share" : "Expired"}
+                      </button>
+                    </td> */}
                     <td><button className='btn btn-warning' onClick={() => showDocument(item.id)}>Show</button></td>
+                    <td><button className='btn btn-danger' onClick={() => deleteDocument(item.link_key)}>Delete</button></td>
                   </tr>
                 ))}
 
@@ -232,7 +293,8 @@ const CreateLink = () => {
           </div>
         </div>
 
-      </div>
+      </div>)}
+
     </>
   )
 }

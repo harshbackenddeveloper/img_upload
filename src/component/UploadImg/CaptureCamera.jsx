@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +21,9 @@ const CaptureCamera = () => {
     //img capture and upload
     const [capturedImages, setCapturedImages] = useState([]);
     const [facingMode, setFacingMode] = useState(FACING_MODE_USER);
-    const [openCamera, setOpenCamera] = useState(false)
+    const [openCamera, setOpenCamera] = useState(false);
+    const [latitude, setLatitude] = useState(null);
+    const [longitude, setLongitude] = useState(null)
     const webcamRef = useRef(null);
 
     const capture = () => {
@@ -54,11 +56,17 @@ const CaptureCamera = () => {
                 formData.append("files[]", image);
             });
             formData.append("key", key);
+            formData.append("latitude", latitude);
+            formData.append("longitude", longitude);
             const response = await makeApi('post', "/v1/user/uploadFile", formData);
-            setOpenCamera(false)
             console.log("response ", response)
-            toast.success("images uploaded successfully");
-            navigate('/')
+            if (response.hasError === true) {
+                toast.error(response.error.message)
+            } else {
+                setOpenCamera(false)
+                toast.success("images uploaded successfully");
+                navigate('/thankyou')
+            }
         } catch (error) {
             console.log(error)
         } finally {
@@ -66,12 +74,33 @@ const CaptureCamera = () => {
         }
     }
 
+
+    useEffect(() => {
+        const getLocation = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const { latitude, longitude } = position.coords;
+                    console.log("latitude", latitude);
+                    console.log("longitude", longitude);
+                    setLatitude(latitude);
+                    setLongitude(longitude);
+                }, (error) => {
+                    console.error('Error getting location:', error);
+                });
+            } else {
+                console.error('Geolocation is not supported by this browser.');
+            }
+        };
+
+        // Call getLocation when component mounts
+        getLocation();
+    }, []);
     return (
         <div>
-            <h4 className='fw-bold  mt-3 ms-3'>Capture image  with camera </h4>
+            <h4 className='fw-bold  mt-5 ms-3'>Capture image  with camera </h4>
             <div>
                 {openCamera ? <button onClick={flipCamera} className='btn btn-primary   ms-3 mb-3 '>Flip Camera</button>
-                    : <button onClick={() => setOpenCamera(true)} className='btn btn-success p-2 ms-3 mb-3'>Open Camera</button>}
+                    : <button onClick={() => setOpenCamera(true)} className='btn btn-success p-2 mt-3 ms-3 mb-3'>Open Camera</button>}
 
                 {openCamera ? (<div className='container-fluid'>
                     <div className='row'>

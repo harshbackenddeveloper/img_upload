@@ -12,7 +12,7 @@ const AllUserList = () => {
   const [loading, setLoading] = useState(false)
 
   const [userDetails, setUserDetails] = useState({
-    first_name: "",
+    surveyor_or_Firm_name: "",
     last_name: "",
     email: "",
     mobile: "",
@@ -50,9 +50,13 @@ const AllUserList = () => {
   const DeleteUser = async (email) => {
     try {
       const deleteUser = await makeApi('post', "/v1/destoryUser", { email: email });
-      console.log("delete user ", deleteUser);
-      toast.success('user deleted successfully');
-      getUserList();
+      if (deleteUser.hasError == true) {
+        toast.error(deleteUser.error.message)
+      }else{
+        console.log("delete user ", deleteUser);
+        toast.success('user deleted successfully');
+        getUserList();
+      }
     } catch (error) {
       console.log(error)
     }
@@ -102,7 +106,7 @@ const AllUserList = () => {
                 <thead className='table-dark'>
                   <tr>
                     <th scope="col">S.No</th>
-                    <th scope="col">First name</th>
+                    <th scope="col">Surveyor Or Firm Name</th>
                     <th scope="col">Last name</th>
                     <th scope="col">Mobile Number</th>
                     <th scope="col">Link limit</th>
@@ -115,7 +119,7 @@ const AllUserList = () => {
                   {user.map((item, index) => (
                     <tr key={item.id}>
                       <th scope="row" >{index + 1}</th>
-                      <td>{item.first_name}</td>
+                      <td>{item.surveyor_or_Firm_name}</td>
                       <td>{item.last_name}</td>
                       <td>{item.mobile}</td>
                       <td>{item.link_limit}</td>
@@ -142,10 +146,10 @@ const AllUserList = () => {
               <h4 className='mb-4  fw-bold'>Edit User Details</h4>
               <form onSubmit={submitEditForm}>
 
-                <TextField label="First name" variant="outlined" className='w-100 mb-3'
-                  name='first_name'
-                  id="first_name"
-                  value={userDetails.first_name}
+                <TextField label="Surveyor Or Firm Name" variant="outlined" className='w-100 mb-3'
+                  name='surveyor_or_Firm_name'
+                  id="surveyor_or_Firm_name"
+                  value={userDetails.surveyor_or_Firm_name}
                   onChange={handleEditDetails}
                 />
 

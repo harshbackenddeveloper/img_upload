@@ -11,6 +11,8 @@ import CreateUser from './component/admin/CreateUser';
 import CreateLink from './component/user/CreateLink';
 import { userlocalStorageData } from './helper/UserToken';
 import UploadDetails from './component/UploadDetails';
+import ThankYou from './component/UploadImg/ThankYou';
+import CreateDepartment from './component/admin/CreateDepartment';
 
 function App() {
   const isAuthenticated = () => {
@@ -40,8 +42,10 @@ function App() {
         {/* admin route */}
         <Route path="/alluserlist" element={<ProtectedRoute element={<AllUserList />} />} />
         <Route path="/createuser" element={<ProtectedRoute element={<CreateUser />} />} />
+        <Route path="/department" element={<ProtectedRoute element={<CreateDepartment />} />} />
 
         <Route path="/uploadDetails/:key" element={<UploadDetails />} />
+        <Route path="/thankyou" element={<ThankYou />} />
 
       </Routes>
 

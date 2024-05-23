@@ -4,10 +4,10 @@ import { makeApi } from '../../helper/MakeApi';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import { toast } from 'react-toastify';
-import { saveAs } from 'file-saver';
 import Loader from '../Loader';
 import '../../assets/css/modal.css'
-import '../../assets/css/ShowImg.css'
+import '../../assets/css/ShowImg.css';
+
 
 
 const ShowDocument = ({ open, handleClose, id }) => {
@@ -22,8 +22,12 @@ const ShowDocument = ({ open, handleClose, id }) => {
                 setLoading(true)
                 const link_id = { link_id: id };
                 const response = await makeApi('post', '/v1/user/showDoc', link_id);
-                console.log("response of img", response)
-                setDocImg(response.data);
+                console.log("response of img", response);
+                if (response.hasError == true) {
+                    toast.error(response.error.message)
+                } else {
+                    setDocImg(response.data);
+                }
             } catch (error) {
                 console.log(error);
             } finally {
@@ -64,6 +68,8 @@ const ShowDocument = ({ open, handleClose, id }) => {
         // Filter out the images that are not downloaded
         const notDownloadedImages = selectedImages.filter(imageId => !checkImgDownload.data.includes(imageId));
 
+        console.log("notDownloadedImages", notDownloadedImages)
+
         if (notDownloadedImages.length > 0) {
             // Display confirmation dialog if some images are not downloaded
             const confirmDelete = window.confirm("Some images are not downloaded. Are you sure you want to delete them?");
@@ -71,7 +77,6 @@ const ShowDocument = ({ open, handleClose, id }) => {
                 return;
             }
         }
-
         const data = await makeApi('post', "/v1/user/deleteimage", { id: selectedImages })
         console.log("after deletetion images", data);
 
@@ -86,7 +91,6 @@ const ShowDocument = ({ open, handleClose, id }) => {
         try {
             const response = await makeApi("post", "/v1/user/downloadimage", { image: item.file });
             console.log("response", response)
-
             const zipData = response.data;
             const decodedLink = decodeURIComponent(zipData);
             window.open(decodedLink);
@@ -97,14 +101,9 @@ const ShowDocument = ({ open, handleClose, id }) => {
     }
 
     const downloadAllImg = async () => {
-        console.log("Deleting images:", selectedImages);
-
-        console.log("kljijfdjfdsfdskjfds", { image_ids: selectedImages })
-
         try {
             const response = await makeApi("post", "/v1/user/downloadmultiimage", { image_ids: selectedImages });
             console.log("response", response)
-
             const zipData = response.data;
             const decodedLink = decodeURIComponent(zipData);
             window.open(decodedLink);
@@ -114,11 +113,30 @@ const ShowDocument = ({ open, handleClose, id }) => {
         }
     }
 
+    // Component to load address based on latitude and longitude
+    const AddressLoader = ({ latitude, longitude }) => {
+        const [address, setAddress] = useState('');
+
+        useEffect(() => {
+            const fetchAddress = async () => {
+                try {
+                    const address = await getAddressFromLatLng(latitude, longitude);
+                    setAddress(address);
+                } catch (error) {
+                    console.error('Error fetching address:', error);
+                }
+            };
+            fetchAddress();
+        }, [latitude, longitude]);
+
+        return address ? address : 'Loading address...';
+    };
+
     return (
         <>
             <Modal className='modal-lg' open={open} onClose={handleClose} closeAfterTransition            >
                 <Fade in={open}>
-                    <Box className="boxStyle shadow border-0 rounded ">
+                    <Box className="boxStyle shadow border-0 rounded " style={{ width: '700px' }} >
                         <h4 className='text-center fw-bold mb-3'>Images</h4>
                         {docImg.length > 0 ? (
                             <div >
@@ -129,25 +147,26 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                 <th scope="col"> <Checkbox checked={selectAll} onChange={handleSelectAll} /></th>
                                                 <th scope="col">S.No</th>
                                                 <th scope="col">Img</th>
+                                                <th scope="col">Latitude</th>
+                                                <th scope="col">Longitude</th>
                                                 <th scope="col">Download</th>
-
                                             </tr>
                                         </thead>
-
                                         {loading ? <Loader /> : (
                                             <tbody>
                                                 {docImg.map((item, index) => (
                                                     <tr key={item.id}>
+                                                        {console.log("data inside map", item)}
                                                         <td><Checkbox checked={selectedImages.includes(item.id)} onChange={() => handleImageSelection(item.id)} /></td>
                                                         <th scope="row" >{index + 1}</th>
                                                         <td>{<img style={{ height: '120px', width: '120px' }} src={"http://sharelink.clientdemobot.com/" + item.file} alt="not found" />}</td>
+                                                        <th scope="row" >{item.latitude}</th>
+                                                        <th scope="row" >{item.longitude}</th>
                                                         <th scope="row"> <DownloadIcon style={{ fontSize: '40px' }} onClick={() => downloadSingleImg(item)} /></th>
                                                     </tr>
                                                 ))}
-
                                             </tbody>
                                         )}
-
                                     </table>
                                 </div>
                                 <div>
@@ -166,6 +185,7 @@ const ShowDocument = ({ open, handleClose, id }) => {
             </Modal>
         </>
     )
+
 }
 
 export default ShowDocument

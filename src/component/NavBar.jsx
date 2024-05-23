@@ -27,6 +27,9 @@ const NavBar = () => {
             <li className="nav-item">
                 <Link className="nav-link fw-bold fs-6 text-dark" to="/createuser">Create User</Link>
             </li>
+            <li className="nav-item">
+                <Link className="nav-link fw-bold fs-6 text-dark" to="/department">Create Department</Link>
+            </li>
         </>
     );
 
