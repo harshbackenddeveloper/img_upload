@@ -3,7 +3,6 @@ import { toast } from 'react-toastify';
 import { Box, Fade, Modal, TextField, } from '@mui/material';
 import { makeApi } from '../../helper/MakeApi';
 import ShowDocument from './ShowDocument';
-import ShareLinkModal from './ShareLinkModal';
 import WhatsappShare from './WhatsappShare';
 import Loader from '../Loader';
 import dayjs from 'dayjs';
@@ -16,15 +15,12 @@ import '../../assets/css/modal.css';
 const CreateLink = () => {
   const [user, setUser] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedLinkURL, setSelectedLinkURL] = useState(''); // New state for selected link URL
 
   //state for modal to show optio of sharing
   const [openOptionShare, setopenOptionShare] = useState(false)
   const handleCloseOptionForShare = () => setopenOptionShare(false)
   const [selectedLinkId, setSelectedLinkId] = useState('')
-
-  //state for share link with user 
-  const [openShareModal, setOpenShareModal] = useState(false)
-  const [selectedShareId, setSelectedShareId] = useState('')
 
   //state for show document to user 
   const [showImageModal, setShowImageModal] = useState(false);
@@ -42,7 +38,6 @@ const CreateLink = () => {
       const LinkList = await makeApi('get', '/v1/user/getLinkById')
       const allDetailsLiks = await makeApi('get', '/v1/user/getstorage');
       setAllLinkDetails(allDetailsLiks.data)
-      // console.log("allDetailsLiks", allDetailsLiks.data);
       console.log("user link created list ", LinkList);
       if (LinkList.hasError == true) {
         toast.error(LinkList.error.message)
@@ -60,7 +55,6 @@ const CreateLink = () => {
     getLinkList()
   }, [])
 
-  console.log("allLinkDetails", allLinkDetails)
 
   //function to copy url in clipboard
   let copyURLToClipboard = (url) => {
@@ -76,20 +70,24 @@ const CreateLink = () => {
   //function to delete link
   const deleteDocument = async (link_key) => {
     console.log("deleted link id", link_key)
+    setLoading(true)
     try {
       const deleteLink = await makeApi('post', `/v1/user/destroy/link`, { key: link_key });
       if (deleteLink.hasError === 'true') {
         toast.error(deleteLink.error.message);
       } else {
+        const updatedUser = user.filter(item => item.link_key !== link_key);
+        setUser(updatedUser);
         toast.success("Link delted successfully")
         console.log("delte link", deleteLink);
         getLinkList();
       }
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false)
     }
   }
-
 
   // these state is for creating link
   const [selectedDate, setSelectedDate] = useState(null);
@@ -123,7 +121,8 @@ const CreateLink = () => {
   }
 
   //functioon for sharing link
-  const shareDocumentLink = async (id) => {
+  const shareDocumentLink = async (id, url) => {
+    setSelectedLinkURL(url); 
     setopenOptionShare(true)
     setSelectedLinkId(id)
   }
@@ -135,10 +134,21 @@ const CreateLink = () => {
   }
 
   //function for sharing userDocument link with email 
-  const shareByEmail = () => {
-    setOpenShareModal(true)
-    setSelectedShareId(selectedLinkId);
-    setopenOptionShare(false)
+  const shareByEmail = async () => {
+    try {
+      const shareData = await makeApi('post', '/v1/user/sendemail', { id: selectedLinkId });
+      console.log("shareData", shareData);
+      if (shareData.hasError == true) {
+        toast.error(shareData.error.message)
+      } else {
+        toast.success("link share successfully")
+        const decodedLink = decodeURIComponent(shareData.data);
+        window.open(decodedLink, '_blank');
+        handleCloseOptionForShare();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   //function for sharing userDocument link with shareByWhatsapp 
@@ -152,15 +162,26 @@ const CreateLink = () => {
   const openCreateLinkModal = () => setModalCreateLink(true);
   const closeCreateLinkModal = () => setModalCreateLink(false);
 
+  console.log("allLinkDetails", allLinkDetails)
+
+  // Function to convert size from KB to MB
+  const convertToMB = (sizeInKB) => {
+    return (sizeInKB / 1024).toFixed(2); // Convert KB to MB and round to 2 decimal places
+  };
+
   return (
     <>
-      {loading ? <Loader /> : (<div className='container'>
-        <div className="card shadow-lg border-1 p-3 mt-3">
-          <div>
-            <button>{allLinkDetails.linkstatus}</button>
-          </div>
-          <div className='d-flex justify-content-end'>
-            <button onClick={openCreateLinkModal} className='btn btn-primary mb-3' >Create Link</button>
+      {loading ? <Loader /> : (<div className='container pt-3'>
+        <div className="card shadow border-1 p-3 mt-5 ">
+
+          <div className='d-flex justify-content-between flex-wrap'>
+            <div>
+              <p className='mb-0 fs-5'>Link-limit : - {allLinkDetails.linkstatus}</p>
+              <p className=' fs-5'> Space {convertToMB(allLinkDetails.remainingspace)} MB Free of {convertToMB(allLinkDetails.totalspace)} MB </p>
+            </div>
+            <div>
+              <button onClick={openCreateLinkModal} className='btn btn-primary mb-3' >Create Link</button>
+            </div>
           </div>
 
           <div className='table-responsive imulcrtlist'>
@@ -170,76 +191,65 @@ const CreateLink = () => {
                   <th scope="col">S.No</th>
                   <th scope="col">Link</th>
                   <th scope="col">URL</th>
-                  <th scope="col">Copy Link</th>
                   <th scope="col">Share</th>
                   <th scope="col">Show</th>
                   <th scope="col">Delete</th>
                 </tr>
               </thead>
               <tbody>
-
                 {user.map((item, index) => (
                   <tr key={item.id}>
                     <th scope="row" >{index + 1}</th>
-                    {console.log("jkjfhfjkfjk", item)}
                     <td>{item.link_name}</td>
                     <td>{item.link_url}</td>
-                    <td><button onClick={() => copyURLToClipboard(item.link_url)}>Copy</button></td>
-                    <td><button className='btn btn-success' onClick={() => shareDocumentLink(item.id)}>{item.status === 0 ? "Share" : "Expired"}</button></td>
-                    {/* <td>
-                      <button
-                        className='btn btn-success'
-                        onClick={() => {
-                          if (item.status === 0) {
-                            shareDocumentLink(item.id);
-                          } else {
-                            // Link is expired, do nothing or show a message
-                            console.log("Link is expired. Cannot share.");
-                          }
-                        }}
-                        disabled={item.status !== 0}
-                      >
-                        {item.status === 0 ? "Share" : "Expired"}
-                      </button>
-                    </td> */}
+                    <td><button className='btn btn-success' onClick={() => {
+                      if (item.status === 0) { shareDocumentLink(item.id, item.link_url); }
+                    }}
+                      disabled={item.status !== 0}
+                    >
+                      {item.status === 0 ? "Share" : "Expired"}
+                    </button>
+                    </td>
                     <td><button className='btn btn-warning' onClick={() => showDocument(item.id)}>Show</button></td>
-                    <td><button className='btn btn-danger' onClick={() => deleteDocument(item.link_key)}>Delete</button></td>
+                    <td> {loading ? <Loader /> : <button className='btn btn-danger' onClick={() => deleteDocument(item.link_key)}>Delete</button>} </td>
                   </tr>
                 ))}
-
               </tbody>
             </table>) : (<h1 style={{ color: "red", textAlign: 'center' }}>No Data available</h1>)}
           </div>
 
           {/* modal to show option for share  */}
-
-          <Modal
-            aria-labelledby="spring-modal-title"
-            aria-describedby="spring-modal-description"
-            open={openOptionShare}
-            onClose={handleCloseOptionForShare}
-            closeAfterTransition
-          >
-
+          <Modal open={openOptionShare} onClose={handleCloseOptionForShare} closeAfterTransition >
             <Fade in={openOptionShare}>
               <Box className='boxStyle shadow border-0 rounded'>
-                <h4 className='text-center mb-3 fw-bold '>Share By Link</h4>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <button className='btn btn-warning mb-2' onClick={() => shareByEmail()}>share by email</button>
-                  <button className='btn btn-success mt-1 mb-2' onClick={() => shareByWhatsapp()}>share by whatsapp</button>
+                <h5 className='mb-3'>Share</h5>
+                <div className="row">
+                  <div className='col-lg-12 col-md-12 col-sm-12'>
+                    <div className='d-flex'>
+                      <div className='me-4'>
+                        <button className='btn btn-dark share-btn' onClick={() => shareByEmail()}><i className="fa-solid fa-envelope text-white" style={{ fontSize: '28px' }}></i></button><br />
+                        <span style={{ fontSize: '14px', marginLeft: '10px' }}>Email</span>
+                      </div>
+                      <div>
+                        <button className='btn btn-success share-btn' onClick={() => shareByWhatsapp()}><i className="fa-brands fa-whatsapp" style={{ fontSize: '28px' }}></i></button><br />
+                        <span style={{ fontSize: '14px' }}>WhatsApp</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className='mt-3 border rounded'>
+                  <div className='row p-2'>
+                    <div className='col-lg-9 col-md-9 col-sm-9'>
+                      <p style={{ overflow: 'hidden' }}>{selectedLinkURL}</p>
+                    </div>
+                    <div className='col-lg-3 col-md-3 col-sm-3'>
+                      <button className='btn btn-primary' onClick={() => copyURLToClipboard(selectedLinkURL)}>Copy</button>
+                    </div>
+                  </div>
                 </div>
               </Box>
             </Fade>
           </Modal>
-
-          {/* popup for sharing link with user by email  */}
-          <div>
-            <ShareLinkModal
-              open={openShareModal}
-              handleCloseShare={() => setOpenShareModal(false)}
-              id={selectedShareId}
-            />
-          </div>
 
           {/* these popup is for showing images whichever user watnt to see */}
           <div>

@@ -13,7 +13,6 @@ const CreateDepartment = () => {
     const [departmentList, setDepartmentList] = useState([])
     const [loading, setLoading] = useState(false);
 
-
     const handleSubmit = async (e) => {
         e.preventDefault()
         setLoading(true)
@@ -54,7 +53,6 @@ const CreateDepartment = () => {
     useEffect(() => {
         getDepartmentList()
     }, []);
-
 
     //function to delete department 
     const deleteDepartment = async (id) => {
@@ -104,16 +102,16 @@ const CreateDepartment = () => {
                             </div>
                         )}
 
-
                     </div>
                 </div>
             </div >
 
             <Modal open={openDepartmentForm} onClose={handleCloseForm}>
-                <Box className="boxStyle">
+                <Box className="boxStyle shadow" sx={{border: '0', borderRadius : '10px'}}>
+                    <h4 className='text-center mb-0'>Create Department</h4>
                     <form onSubmit={handleSubmit}>
                         <CardContent>
-                            <TextField label="Department" placeholder="Department" variant="outlined" sx={{ width: '100%', marginTop: '10px' }} id="setDepartmentName" name="setDepartmentName" onChange={(e) => setDepartmentName(e.target.value)} />
+                            <TextField label="Department" placeholder="Department" variant="outlined" sx={{ width: '100%',  }} id="setDepartmentName" name="setDepartmentName" onChange={(e) => setDepartmentName(e.target.value)} />
                         </CardContent>
                         <CardActions sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             {loading ? <Loader /> : <Button variant="contained" type='submit'>Create</Button>}

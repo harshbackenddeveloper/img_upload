@@ -35,7 +35,7 @@ const Home = () => {
 
   return (
     <>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%',  position: 'fixed' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }} className="d-flex justify-content-center bg-warning">
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Admin Login" {...a11yProps(0)} />

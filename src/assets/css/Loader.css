@@ -20,18 +20,26 @@
 }
 
 .login-main {
-  height: 93.8vh;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
 }
-.login-main-creating {
-  height: 95.3vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
+.mgulmnbg{
+  background-color: #3498DB;
+}
+
+
+
+.logign-main-creating {
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 100px 0;
+    padding: 34.5px 0;
 }
 /* creat-Link css start */
 .imulcrtlist{
@@ -39,6 +47,13 @@
   height: 500px;
   scrollbar-width: thin;
 overflow-y: auto;
+}
+
+.share-btn{
+  width: 56px;
+  border-radius: 44px;
+  color: white;
+  padding: 12px;
 }
 
 @keyframes spin {
@@ -51,7 +66,7 @@ overflow-y: auto;
   }
 }
 
-@media(max-width : 768px){
+/* @media(max-width : 768px){
   .login-main-creating{
     height: auto;
     padding: 85px 0;
@@ -81,4 +96,4 @@ overflow-y: auto;
     height: 93.8vh;
   }
   
-}
+} */

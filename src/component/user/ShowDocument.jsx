@@ -60,6 +60,10 @@ const ShowDocument = ({ open, handleClose, id }) => {
 
     const handleDeleteImages = async () => {
         console.log("Deleting images:", selectedImages);
+        if (selectedImages.length <= 0) {
+            toast.error('please select img');
+            return;
+        }
 
         // Check if any selected image is not downloaded
         const checkImgDownload = await makeApi("post", "/v1/user/checkimage", { id: selectedImages });
@@ -67,7 +71,6 @@ const ShowDocument = ({ open, handleClose, id }) => {
 
         // Filter out the images that are not downloaded
         const notDownloadedImages = selectedImages.filter(imageId => !checkImgDownload.data.includes(imageId));
-
         console.log("notDownloadedImages", notDownloadedImages)
 
         if (notDownloadedImages.length > 0) {
@@ -102,6 +105,10 @@ const ShowDocument = ({ open, handleClose, id }) => {
 
     const downloadAllImg = async () => {
         try {
+            if (selectedImages.length <= 0) {
+                toast.error('please select img');
+                return;
+            }
             const response = await makeApi("post", "/v1/user/downloadmultiimage", { image_ids: selectedImages });
             console.log("response", response)
             const zipData = response.data;
@@ -113,25 +120,15 @@ const ShowDocument = ({ open, handleClose, id }) => {
         }
     }
 
-    // Component to load address based on latitude and longitude
-    const AddressLoader = ({ latitude, longitude }) => {
-        const [address, setAddress] = useState('');
+    function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString();
+    }
 
-        useEffect(() => {
-            const fetchAddress = async () => {
-                try {
-                    const address = await getAddressFromLatLng(latitude, longitude);
-                    setAddress(address);
-                } catch (error) {
-                    console.error('Error fetching address:', error);
-                }
-            };
-            fetchAddress();
-        }, [latitude, longitude]);
-
-        return address ? address : 'Loading address...';
-    };
-
+    function formatTime(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString();
+    }
     return (
         <>
             <Modal className='modal-lg' open={open} onClose={handleClose} closeAfterTransition            >
@@ -147,6 +144,7 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                 <th scope="col"> <Checkbox checked={selectAll} onChange={handleSelectAll} /></th>
                                                 <th scope="col">S.No</th>
                                                 <th scope="col">Img</th>
+                                                <th scope="col">Date/Time</th>
                                                 <th scope="col">Latitude</th>
                                                 <th scope="col">Longitude</th>
                                                 <th scope="col">Download</th>
@@ -160,6 +158,7 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                         <td><Checkbox checked={selectedImages.includes(item.id)} onChange={() => handleImageSelection(item.id)} /></td>
                                                         <th scope="row" >{index + 1}</th>
                                                         <td>{<img style={{ height: '120px', width: '120px' }} src={"http://sharelink.clientdemobot.com/" + item.file} alt="not found" />}</td>
+                                                        <th scope="row" >Date: {formatDate(item.created_at)}, Time: {formatTime(item.created_at)}</th>
                                                         <th scope="row" >{item.latitude}</th>
                                                         <th scope="row" >{item.longitude}</th>
                                                         <th scope="row"> <DownloadIcon style={{ fontSize: '40px' }} onClick={() => downloadSingleImg(item)} /></th>
@@ -185,7 +184,6 @@ const ShowDocument = ({ open, handleClose, id }) => {
             </Modal>
         </>
     )
-
 }
 
 export default ShowDocument

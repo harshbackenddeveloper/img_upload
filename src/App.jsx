@@ -7,12 +7,14 @@ import 'react-toastify/dist/ReactToastify.css';
 import NavBar from './component/NavBar';
 import Home from './component/Home';
 import AllUserList from './component/admin/AllUserList';
-import CreateUser from './component/admin/CreateUser';
 import CreateLink from './component/user/CreateLink';
 import { userlocalStorageData } from './helper/UserToken';
 import UploadDetails from './component/UploadDetails';
 import ThankYou from './component/UploadImg/ThankYou';
 import CreateDepartment from './component/admin/CreateDepartment';
+import ForgetPassword from './component/ForgetPassword';
+import Conframp from './component/Conframp';
+import Create_Edit_form from './component/admin/Create_Edit_form';
 
 function App() {
   const isAuthenticated = () => {
@@ -36,16 +38,20 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
 
-        {/* super admin */}
+        {/* User route*/}
         <Route path="/createlink" element={<ProtectedRoute element={<CreateLink />} />} />
 
         {/* admin route */}
         <Route path="/alluserlist" element={<ProtectedRoute element={<AllUserList />} />} />
-        <Route path="/createuser" element={<ProtectedRoute element={<CreateUser />} />} />
         <Route path="/department" element={<ProtectedRoute element={<CreateDepartment />} />} />
+        <Route path="/form/:names" element={<ProtectedRoute element={<Create_Edit_form />} />} />
 
+        {/* common route  */}
         <Route path="/uploadDetails/:key" element={<UploadDetails />} />
         <Route path="/thankyou" element={<ThankYou />} />
+        <Route path="/forgetpassword" element={<ForgetPassword />} />
+
+        <Route path="/confirmpassword/:token" element={<Conframp />} />
 
       </Routes>
 
