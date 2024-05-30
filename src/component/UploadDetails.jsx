@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Box } from '@mui/material';
 import CaptureCamera from './UploadImg/CaptureCamera';
 import SystemImages from './UploadImg/SystemImages';
 import { makeApi } from '../helper/MakeApi';
@@ -11,7 +10,7 @@ const UploadDetails = () => {
     const { key } = useParams()
     const [isValid, setIsValid] = useState();
     const [loading, setLoading] = useState(false)
-
+    const [errorMessage, setErrorMessage] = useState('')
 
     //function to check link is valid is or not
     const CheckValid = async () => {
@@ -23,6 +22,7 @@ const UploadDetails = () => {
                 setIsValid(true)
             } else {
                 setIsValid(false);
+                setErrorMessage(response.error.message);
             }
         } catch (error) {
             console.log(error)
@@ -50,7 +50,7 @@ const UploadDetails = () => {
                         </div>
                     </div>
 
-                ) : (<h1 style={{ color: 'red', textAlign: 'center' }}>"link is expired"</h1>)
+                ) : (<h1 style={{ color: 'red', textAlign: 'center' }}>{errorMessage}</h1>)
             )}
         </>
     );

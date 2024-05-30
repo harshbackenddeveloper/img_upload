@@ -7,8 +7,8 @@ import { toast } from 'react-toastify';
 const SystemImages = () => {
     const { key } = useParams();
     const navigate = useNavigate();
-    const [latitude, setLatitude] = useState(null);
-    const [longitude, setLongitude] = useState(null)
+    const [latitude, setLatitude] = useState();
+    const [longitude, setLongitude] = useState()
     const [loading, setLoading] = useState(false);
 
     const [selectedImages, setSelectedImages] = useState([]);
@@ -20,11 +20,11 @@ const SystemImages = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (selectedImages.length <= 0) {
+            toast.error("please select file")
+        }
         setLoading(true)
         try {
-            if (!selectedImages) {
-                toast.error("please select file")
-            }
             const formData = new FormData();
             selectedImages.forEach(image => {
                 formData.append("files[]", image);
@@ -53,8 +53,6 @@ const SystemImages = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
                     const { latitude, longitude } = position.coords;
-                    console.log("latitude", latitude);
-                    console.log("longitude", longitude);
                     setLatitude(latitude);
                     setLongitude(longitude);
                 }, (error) => {
@@ -71,10 +69,8 @@ const SystemImages = () => {
 
     return (
         <div>
-
             <div className="container ">
                 <div className="row">
-
                     <div className="col-lg-12  mt-1">
                         <div className="card p-4 p-lg-5 p-md-5 p-sm-5 p-xl-5 p-xxl-5  shadow-lg border-1 d-flex justify-content-between  mt-5">
                             <h4 className='fw-bold mb-3 '>Choose file from you system</h4>

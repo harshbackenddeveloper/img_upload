@@ -22,8 +22,8 @@ const CaptureCamera = () => {
     const [capturedImages, setCapturedImages] = useState([]);
     const [facingMode, setFacingMode] = useState(FACING_MODE_USER);
     const [openCamera, setOpenCamera] = useState(false);
-    const [latitude, setLatitude] = useState(null);
-    const [longitude, setLongitude] = useState(null)
+    const [latitude, setLatitude] = useState();
+    const [longitude, setLongitude] = useState()
     const webcamRef = useRef(null);
 
     const capture = () => {
@@ -49,6 +49,10 @@ const CaptureCamera = () => {
 
     const uploadImg = async (e) => {
         e.preventDefault();
+        if (capturedImages.length <= 0) {
+            toast.error('please capture atleast 1 image');
+            return;
+        }
         setLoading(true)
         try {
             const formData = new FormData();
@@ -74,16 +78,14 @@ const CaptureCamera = () => {
         }
     }
 
-
     useEffect(() => {
         const getLocation = () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
                     const { latitude, longitude } = position.coords;
-                    console.log("latitude", latitude);
-                    console.log("longitude", longitude);
                     setLatitude(latitude);
                     setLongitude(longitude);
+                    
                 }, (error) => {
                     console.error('Error getting location:', error);
                 });
@@ -91,10 +93,10 @@ const CaptureCamera = () => {
                 console.error('Geolocation is not supported by this browser.');
             }
         };
-
-        // Call getLocation when component mounts
         getLocation();
     }, []);
+
+    
     return (
         <div>
             <h4 className='fw-bold  mt-5 ms-3'>Capture image  with camera </h4>

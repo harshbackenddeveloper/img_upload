@@ -11,6 +11,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import '../../assets/css/modal.css';
+import CloseIcon from '@mui/icons-material/Close';
+import { ProperDateFormat } from '../../helper/UserToken';
 
 const CreateLink = () => {
   const [user, setUser] = useState([]);
@@ -54,7 +56,6 @@ const CreateLink = () => {
   useEffect(() => {
     getLinkList()
   }, [])
-
 
   //function to copy url in clipboard
   let copyURLToClipboard = (url) => {
@@ -122,7 +123,7 @@ const CreateLink = () => {
 
   //functioon for sharing link
   const shareDocumentLink = async (id, url) => {
-    setSelectedLinkURL(url); 
+    setSelectedLinkURL(url);
     setopenOptionShare(true)
     setSelectedLinkId(id)
   }
@@ -162,13 +163,6 @@ const CreateLink = () => {
   const openCreateLinkModal = () => setModalCreateLink(true);
   const closeCreateLinkModal = () => setModalCreateLink(false);
 
-  console.log("allLinkDetails", allLinkDetails)
-
-  // Function to convert size from KB to MB
-  const convertToMB = (sizeInKB) => {
-    return (sizeInKB / 1024).toFixed(2); // Convert KB to MB and round to 2 decimal places
-  };
-
   return (
     <>
       {loading ? <Loader /> : (<div className='container pt-3'>
@@ -177,7 +171,7 @@ const CreateLink = () => {
           <div className='d-flex justify-content-between flex-wrap'>
             <div>
               <p className='mb-0 fs-5'>Link-limit : - {allLinkDetails.linkstatus}</p>
-              <p className=' fs-5'> Space {convertToMB(allLinkDetails.remainingspace)} MB Free of {convertToMB(allLinkDetails.totalspace)} MB </p>
+              <p className=' fs-5'> Space {(allLinkDetails.remainingspace)} MB Free of {(allLinkDetails.totalspace)} MB </p>
             </div>
             <div>
               <button onClick={openCreateLinkModal} className='btn btn-primary mb-3' >Create Link</button>
@@ -191,6 +185,7 @@ const CreateLink = () => {
                   <th scope="col">S.No</th>
                   <th scope="col">Link</th>
                   <th scope="col">URL</th>
+                  <th scope="col">Expiry Date</th>
                   <th scope="col">Share</th>
                   <th scope="col">Show</th>
                   <th scope="col">Delete</th>
@@ -202,6 +197,7 @@ const CreateLink = () => {
                     <th scope="row" >{index + 1}</th>
                     <td>{item.link_name}</td>
                     <td>{item.link_url}</td>
+                    <td>{ProperDateFormat({ dateString: item.expiry_date })}</td>
                     <td><button className='btn btn-success' onClick={() => {
                       if (item.status === 0) { shareDocumentLink(item.id, item.link_url); }
                     }}
@@ -222,7 +218,10 @@ const CreateLink = () => {
           <Modal open={openOptionShare} onClose={handleCloseOptionForShare} closeAfterTransition >
             <Fade in={openOptionShare}>
               <Box className='boxStyle shadow border-0 rounded'>
-                <h5 className='mb-3'>Share</h5>
+                <div className='d-flex justify-content-between'>
+                  <h5 className='mb-3'>Share</h5>
+                  <CloseIcon style={{ color: 'red', cursor: 'pointer' }} onClick={() => handleCloseOptionForShare()} />
+                </div>
                 <div className="row">
                   <div className='col-lg-12 col-md-12 col-sm-12'>
                     <div className='d-flex'>
@@ -274,7 +273,10 @@ const CreateLink = () => {
               <Box className="shadow border-0 rounded boxStyle">
                 <form onSubmit={createLink}>
                   <div className="card-body text-center p-2 ">
-                    <h3 className="mb-4 fw-bold">Create Link</h3>
+                    <div className='d-flex justify-content-between'>
+                      <h5 className='mb-3'>Create Link</h5>
+                      <CloseIcon style={{ color: 'red', cursor: 'pointer' }} onClick={() => closeCreateLinkModal()} />
+                    </div>
                     <TextField label="Link Name" variant="outlined" className=' w-100 mb-4 me-3'
                       name='link_name'
                       id="link_name"
@@ -284,7 +286,7 @@ const CreateLink = () => {
 
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DemoContainer components={['DatePicker', 'DatePicker']}>
-                        <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4 me-3'
+                        <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4 me-3' format="DD-MM-YYYY"
                           name='selectedDate'
                           id="selectedDate"
                           value={selectedDate ? selectedDate : null}

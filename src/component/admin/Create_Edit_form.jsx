@@ -202,7 +202,7 @@ const Create_Edit_form = () => {
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-1 ">
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                                    <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4'
+                                                    <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4' format="DD-MM-YYYY"
                                                         name='selectedDate'
                                                         id="selectedDate"
                                                         value={selectedDate ? selectedDate : null}
@@ -212,8 +212,9 @@ const Create_Edit_form = () => {
                                             </LocalizationProvider>
                                         </div>
 
+
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-1 mt-2">
-                                            <TextField variant="outlined" className='w-100' label="SLA Number" placeholder='SLA Number'
+                                            <TextField variant="outlined" className='w-100' label="SLA Number" placeholder='SLA Number eg.SLA-12562'
                                                 name='sla_number'
                                                 id="sla_number"
                                                 value={userDetails.sla_number}
@@ -224,7 +225,7 @@ const Create_Edit_form = () => {
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-1">
                                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                                 <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                                    <DatePicker label="SLA Expiry" variant="outlined" className=' w-100 mb-4'
+                                                    <DatePicker label="SLA Expiry" variant="outlined" className=' w-100 mb-4' format="DD-MM-YYYY"
                                                         name='slaExpiryDate'
                                                         id="slaExpiryDate"
                                                         value={slaExpiryDate ? slaExpiryDate : null}
@@ -235,7 +236,7 @@ const Create_Edit_form = () => {
                                         </div>
 
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                            <TextField variant="outlined" className='w-100' label="Storage Size Limit" placeholder='Size in kb eg.3500kb'
+                                            <TextField variant="outlined" className='w-100' label="Storage Size Limit" placeholder='Size in mb eg.35mb'
                                                 name='space'
                                                 id="space"
                                                 value={userDetails.space}
@@ -271,7 +272,7 @@ const Create_Edit_form = () => {
                                         </div>
 
                                         <div className="col-lg-6 col-md-6 col-sm-12 mb-3">
-                                            <TextField variant="outlined" className='w-100' label="IIISLA Member Number" placeholder='IIISLA Member Number'
+                                            <TextField variant="outlined" className='w-100' label="IIISLA Member Number" placeholder='eg.F/S/A/00252'
                                                 name='iiisla_number'
                                                 id="iiisla_number"
                                                 value={userDetails.iiisla_number}

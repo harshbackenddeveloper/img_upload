@@ -8,9 +8,6 @@ const NavBar = () => {
     const { userToken, Role_User } = userlocalStorageData();
 
     const LogoutUser = () => {
-        // localStorage.removeItem("token");
-        // localStorage.removeItem("User_Role");
-
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("User_Role");
         toast.success('logout successfully')
@@ -24,9 +21,7 @@ const NavBar = () => {
             <li className="nav-item">
                 <Link className="nav-link fw-bold fs-6 text-dark" to="/alluserlist">User List</Link>
             </li>
-            {/* <li className="nav-item">
-                <Link className="nav-link fw-bold fs-6 text-dark" to="/createuser">Create User</Link>
-            </li> */}
+            
             <li className="nav-item">
                 <Link className="nav-link fw-bold fs-6 text-dark" to="/department">Create Department</Link>
             </li>

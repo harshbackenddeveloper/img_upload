@@ -7,8 +7,7 @@ import { toast } from 'react-toastify';
 import Loader from '../Loader';
 import '../../assets/css/modal.css'
 import '../../assets/css/ShowImg.css';
-
-
+import CloseIcon from '@mui/icons-material/Close';
 
 const ShowDocument = ({ open, handleClose, id }) => {
     const [loading, setLoading] = useState(false)
@@ -24,9 +23,10 @@ const ShowDocument = ({ open, handleClose, id }) => {
                 const response = await makeApi('post', '/v1/user/showDoc', link_id);
                 console.log("response of img", response);
                 if (response.hasError == true) {
-                    toast.error(response.error.message)
+                    toast.error(response.error.message);
+                    setDocImg([]);
                 } else {
-                    setDocImg(response.data);
+                    setDocImg(response?.data || []);
                 }
             } catch (error) {
                 console.log(error);
@@ -129,14 +129,18 @@ const ShowDocument = ({ open, handleClose, id }) => {
         const date = new Date(timestamp);
         return date.toLocaleTimeString();
     }
+
     return (
         <>
             <Modal className='modal-lg' open={open} onClose={handleClose} closeAfterTransition            >
                 <Fade in={open}>
                     <Box className="boxStyle shadow border-0 rounded " style={{ width: '700px' }} >
-                        <h4 className='text-center fw-bold mb-3'>Images</h4>
-                        {docImg.length > 0 ? (
-                            <div >
+                        <div className='d-flex justify-content-between'>
+                            <h4 className='text-center fw-bold mb-3'>{docImg[0] && docImg[0].doc_name}</h4>
+                            <CloseIcon style={{ color: 'red', cursor: 'pointer' }} onClick={() => handleClose()} />
+                        </div>
+                        {loading ? <Loader /> : (
+                            docImg.length > 0 ? (<div>
                                 <div className="table-responsive imupcrpopo">
                                     <table className="table table-hover table-bordered ">
                                         <thead className="table-dark">
@@ -150,22 +154,22 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                 <th scope="col">Download</th>
                                             </tr>
                                         </thead>
-                                        {loading ? <Loader /> : (
-                                            <tbody>
-                                                {docImg.map((item, index) => (
-                                                    <tr key={item.id}>
-                                                        {console.log("data inside map", item)}
-                                                        <td><Checkbox checked={selectedImages.includes(item.id)} onChange={() => handleImageSelection(item.id)} /></td>
-                                                        <th scope="row" >{index + 1}</th>
-                                                        <td>{<img style={{ height: '120px', width: '120px' }} src={"http://sharelink.clientdemobot.com/" + item.file} alt="not found" />}</td>
-                                                        <th scope="row" >Date: {formatDate(item.created_at)}, Time: {formatTime(item.created_at)}</th>
-                                                        <th scope="row" >{item.latitude}</th>
-                                                        <th scope="row" >{item.longitude}</th>
-                                                        <th scope="row"> <DownloadIcon style={{ fontSize: '40px' }} onClick={() => downloadSingleImg(item)} /></th>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        )}
+
+                                        <tbody>
+                                            {docImg.map((item, index) => (
+                                                <tr key={item.id}>
+                                                    {/* {console.log("data inside map", item)} */}
+                                                    <td><Checkbox checked={selectedImages.includes(item.id)} onChange={() => handleImageSelection(item.id)} /></td>
+                                                    <th scope="row" >{index + 1}</th>
+                                                    <td>{<img style={{ height: '120px', width: '120px' }} src={"http://sharelink.clientdemobot.com/" + item.file} alt="not found" />}</td>
+                                                    <th scope="row" >Date: {formatDate(item.created_at)}, Time: {formatTime(item.created_at)}</th>
+                                                    <th scope="row" >{item.latitude}</th>
+                                                    <th scope="row" >{item.longitude}</th>
+                                                    <th scope="row"> <DownloadIcon style={{ fontSize: '40px' }} onClick={() => downloadSingleImg(item)} /></th>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+
                                     </table>
                                 </div>
                                 <div>
@@ -177,8 +181,8 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                         <DownloadIcon style={{ fontSize: '30px' }} onClick={() => downloadAllImg()} />
                                     </IconButton>
                                 </div>
-                            </div>
-                        ) : (<h3 style={{ color: "red", textAlign: 'center' }}>Photo's are not available</h3>)}
+                            </div>) : (<h3 style={{ color: "red", textAlign: 'center' }}>Photo's are not available</h3>)
+                        )}
                     </Box>
                 </Fade>
             </Modal>

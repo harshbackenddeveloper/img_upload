@@ -15,6 +15,7 @@ import CreateDepartment from './component/admin/CreateDepartment';
 import ForgetPassword from './component/ForgetPassword';
 import Conframp from './component/Conframp';
 import Create_Edit_form from './component/admin/Create_Edit_form';
+import NotFound from './component/NotFound';
 
 function App() {
   const isAuthenticated = () => {
@@ -38,20 +39,20 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
 
-        {/* User route*/}
-        <Route path="/createlink" element={<ProtectedRoute element={<CreateLink />} />} />
-
         {/* admin route */}
         <Route path="/alluserlist" element={<ProtectedRoute element={<AllUserList />} />} />
         <Route path="/department" element={<ProtectedRoute element={<CreateDepartment />} />} />
         <Route path="/form/:names" element={<ProtectedRoute element={<Create_Edit_form />} />} />
 
+        {/* User route*/}
+        <Route path="/createlink" element={<ProtectedRoute element={<CreateLink />} />} />
+
         {/* common route  */}
-        <Route path="/uploadDetails/:key" element={<UploadDetails />} />
         <Route path="/thankyou" element={<ThankYou />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
-
         <Route path="/confirmpassword/:token" element={<Conframp />} />
+        <Route path="/uploadDetails/:key" element={<UploadDetails />} />
+        <Route path="/notfound" element={<NotFound />} />
 
       </Routes>
 
