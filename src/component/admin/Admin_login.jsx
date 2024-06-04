@@ -38,7 +38,6 @@ const Adminlogin = () => {
         toast.success('login successfully')
         navigate('/alluserlist')
       }
-
     } catch (error) {
       console.log(error);
     } finally {
@@ -48,7 +47,6 @@ const Adminlogin = () => {
 
   return (
     <>
-
       <div className="container-fluid  mgulmnbg " >
         <div className="container login-main ">
           <div className="col-lg-6  col-xl-5 col-xxl-5">
@@ -57,18 +55,20 @@ const Adminlogin = () => {
                 <div className="card-body  text-center">
                   <h3 className="mb-4 fw-bold">Admin Sign in</h3>
 
-                  <TextField type='text' label="Email" variant="outlined" className='w-100 mb-3'
+                  <TextField type='text' variant="outlined" className='w-100 mb-3' placeholder='Email'
                     name='email'
                     id="email"
                     value={formData.email}
                     onChange={handleChange}
+                    autoComplete="current-email"
                   />
 
-                  <TextField type='password' label="Password" variant="outlined" className='w-100 mb-4'
+                  <TextField type='password' variant="outlined" className='w-100 mb-4' placeholder='Password'
                     name='password'
                     id="password"
                     value={formData.password}
                     onChange={handleChange}
+                    autoComplete="current-password"
                   />
                   <div className='d-flex justify-content-end align-items-center flex-wrap'>
                     <Link className='fw-bold' to='/forgetpassword'>Forgot password?</Link>

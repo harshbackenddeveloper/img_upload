@@ -14,31 +14,34 @@ const ShowDocument = ({ open, handleClose, id }) => {
     const [docImg, setDocImg] = useState([]);
     const [selectedImages, setSelectedImages] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
+    const [downloadMessage, setDownloadMessage] = useState(false)
+
+
+    const getDocumentByLinkId = async () => {
+        try {
+            setLoading(true)
+            const link_id = { link_id: id };
+            const response = await makeApi('post', '/v1/user/showDoc', link_id);
+            console.log("response of img", response);
+            if (response.hasError == true) {
+                toast.error(response.error.message);
+                setDocImg([]);
+            } else {
+                setDocImg(response?.data || []);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false)
+        }
+    };
 
     useEffect(() => {
-        const getDocumentByLinkId = async () => {
-            try {
-                setLoading(true)
-                const link_id = { link_id: id };
-                const response = await makeApi('post', '/v1/user/showDoc', link_id);
-                console.log("response of img", response);
-                if (response.hasError == true) {
-                    toast.error(response.error.message);
-                    setDocImg([]);
-                } else {
-                    setDocImg(response?.data || []);
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false)
-            }
-        };
-
         if (open) {
             getDocumentByLinkId();
         }
     }, [open, id]);
+
 
     const handleImageSelection = (imageId) => {
         if (selectedImages.includes(imageId)) {
@@ -58,50 +61,31 @@ const ShowDocument = ({ open, handleClose, id }) => {
         }
     };
 
+
+
     const handleDeleteImages = async () => {
         console.log("Deleting images:", selectedImages);
-        if (selectedImages.length <= 0) {
-            toast.error('please select img');
+        if (selectedImages.length === 0) {
+            toast.error('Please select an image');
             return;
         }
 
-        // Check if any selected image is not downloaded
         const checkImgDownload = await makeApi("post", "/v1/user/checkimage", { id: selectedImages });
-        console.log("Check image before download:", checkImgDownload);
+        const downloadMessage = checkImgDownload?.hasError === false && checkImgDownload?.error?.status;
 
-        // Filter out the images that are not downloaded
-        const notDownloadedImages = selectedImages.filter(imageId => !checkImgDownload.data.includes(imageId));
-        console.log("notDownloadedImages", notDownloadedImages)
-
-        if (notDownloadedImages.length > 0) {
-            // Display confirmation dialog if some images are not downloaded
-            const confirmDelete = window.confirm("Some images are not downloaded. Are you sure you want to delete them?");
-            if (!confirmDelete) {
-                return;
-            }
+        const confirmMessage = downloadMessage ? "Are you sure you want to delete them?" : "There are undownloaded images. Do you still want to delete them?";
+        const confirmDelete = window.confirm(confirmMessage);
+        if (!confirmDelete) {
+            return;
         }
-        const data = await makeApi('post', "/v1/user/deleteimage", { id: selectedImages })
-        console.log("after deletetion images", data);
 
-        const updatedDocImg = docImg.filter(item => !selectedImages.includes(item.id));
-        setDocImg(updatedDocImg);
-        toast.success('user images delete successfully')
+        const data = await makeApi('post', "/v1/user/deleteimage", { id: selectedImages });
+        console.log("After deletion images", data);
+        getDocumentByLinkId();
+        toast.success('User images deleted successfully');
         setSelectedImages([]);
     };
 
-    //download single images
-    const downloadSingleImg = async (item) => {
-        try {
-            const response = await makeApi("post", "/v1/user/downloadimage", { image: item.file });
-            console.log("response", response)
-            const zipData = response.data;
-            const decodedLink = decodeURIComponent(zipData);
-            window.open(decodedLink);
-        } catch (error) {
-            console.error("Error downloading image:", error);
-            toast.error('Error downloading image');
-        }
-    }
 
     const downloadAllImg = async () => {
         try {
@@ -109,11 +93,12 @@ const ShowDocument = ({ open, handleClose, id }) => {
                 toast.error('please select img');
                 return;
             }
-            const response = await makeApi("post", "/v1/user/downloadmultiimage", { image_ids: selectedImages });
+            const response = await makeApi("post", "/v1/user/downloadmultiimage", { image_ids: selectedImages, link: docImg[0] && docImg[0].doc_name });
             console.log("response", response)
             const zipData = response.data;
             const decodedLink = decodeURIComponent(zipData);
             window.open(decodedLink);
+            getDocumentByLinkId();
         } catch (error) {
             console.error("Error downloading image:", error);
             toast.error('Error downloading image');
@@ -122,7 +107,8 @@ const ShowDocument = ({ open, handleClose, id }) => {
 
     function formatDate(timestamp) {
         const date = new Date(timestamp);
-        return date.toLocaleDateString();
+        const options = { day: '2-digit', month: '2-digit', year: '2-digit' };
+        return date.toLocaleDateString('en-GB', options);
     }
 
     function formatTime(timestamp) {
@@ -134,7 +120,7 @@ const ShowDocument = ({ open, handleClose, id }) => {
         <>
             <Modal className='modal-lg' open={open} onClose={handleClose} closeAfterTransition            >
                 <Fade in={open}>
-                    <Box className="boxStyle shadow border-0 rounded " style={{ width: '700px' }} >
+                    <Box className="boxStyleShowDocument shadow border-0 rounded ">
                         <div className='d-flex justify-content-between'>
                             <h4 className='text-center fw-bold mb-3'>{docImg[0] && docImg[0].doc_name}</h4>
                             <CloseIcon style={{ color: 'red', cursor: 'pointer' }} onClick={() => handleClose()} />
@@ -151,21 +137,22 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                 <th scope="col">Date/Time</th>
                                                 <th scope="col">Latitude</th>
                                                 <th scope="col">Longitude</th>
-                                                <th scope="col">Download</th>
+                                                <th scope="col">Downloaded At</th>
+                                                <th scope="col">Deleted At</th>
                                             </tr>
                                         </thead>
 
                                         <tbody>
                                             {docImg.map((item, index) => (
                                                 <tr key={item.id}>
-                                                    {/* {console.log("data inside map", item)} */}
                                                     <td><Checkbox checked={selectedImages.includes(item.id)} onChange={() => handleImageSelection(item.id)} /></td>
                                                     <th scope="row" >{index + 1}</th>
-                                                    <td>{<img style={{ height: '120px', width: '120px' }} src={"http://sharelink.clientdemobot.com/" + item.file} alt="not found" />}</td>
+                                                    <td>{item.is_deleted !== 1 ? <img style={{ height: '120px', width: '120px' }} src={"http://sharelink.clientdemobot.com/" + item.file} alt="Delete" /> : <h4 style={{ color: "red" }}>Deleted</h4>}</td>
                                                     <th scope="row" >Date: {formatDate(item.created_at)}, Time: {formatTime(item.created_at)}</th>
                                                     <th scope="row" >{item.latitude}</th>
                                                     <th scope="row" >{item.longitude}</th>
-                                                    <th scope="row"> <DownloadIcon style={{ fontSize: '40px' }} onClick={() => downloadSingleImg(item)} /></th>
+                                                    <th scope="row">{item.is_download === 1 ? `Date: ${formatDate(item.download_at)}, Time: ${formatTime(item.download_at)}` : ""}</th>
+                                                    <th scope="row">{item.is_deleted === 1 ? `Date: ${formatDate(item.updated_at)}, Time: ${formatTime(item.updated_at)}` : ""}</th>
                                                 </tr>
                                             ))}
                                         </tbody>

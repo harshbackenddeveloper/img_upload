@@ -8,7 +8,6 @@ import NavBar from './component/NavBar';
 import Home from './component/Home';
 import AllUserList from './component/admin/AllUserList';
 import CreateLink from './component/user/CreateLink';
-import { userlocalStorageData } from './helper/UserToken';
 import UploadDetails from './component/UploadDetails';
 import ThankYou from './component/UploadImg/ThankYou';
 import CreateDepartment from './component/admin/CreateDepartment';
@@ -18,9 +17,12 @@ import Create_Edit_form from './component/admin/Create_Edit_form';
 import NotFound from './component/NotFound';
 
 function App() {
+
   const isAuthenticated = () => {
-    const userData = userlocalStorageData();
-    return userData && userData.userToken;
+
+    const localData = sessionStorage.getItem("token")
+    const userToken = JSON.parse(localData)
+    return userToken;
   };
 
   // Create a custom ProtectedRoute component

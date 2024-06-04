@@ -3,6 +3,7 @@ import { userlocalStorageData } from "./UserToken";
 export const makeApi = async (req, url, body) => {
 
     const userToken = userlocalStorageData().userToken
+  
 
     const previousUrl = "https://sharelink.clientdemobot.com/api"
     var config = {
@@ -12,7 +13,7 @@ export const makeApi = async (req, url, body) => {
         headers: {
             Authorization: `Bearer ${userToken}`,
             'Content-Type': 'multipart/form-data',
-            access_control_allow_origin : "*" 
+            access_control_allow_origin: "*"
         }
     };
     try {

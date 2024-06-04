@@ -17,6 +17,7 @@ const Create_Edit_form = () => {
     const [loading, setLoading] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [slaExpiryDate, setSlaExpiryDate] = useState("");
+    const [clientExpiryDate, setClientExpiryDate] = useState("");
     const [departmentList, setDepartmentList] = useState([]);
     const [selectedDepartment, setSelectedDepartment] = useState('');
     const [userDetails, setUserDetails] = useState({
@@ -85,6 +86,7 @@ const Create_Edit_form = () => {
                 });
                 setSlaExpiryDate(dayjs(user.sla_expiry_date));
                 setSelectedDate(dayjs(user.expiry_date));
+                setClientExpiryDate(dayjs(user.client_expiry_date));
                 setSelectedDepartment(user.department);
             }
         } catch (error) {
@@ -100,7 +102,8 @@ const Create_Edit_form = () => {
         try {
             const user_expiry_date = dayjs(selectedDate).format('YYYY-MM-DD');
             const sla_expiry_date = dayjs(slaExpiryDate).format('YYYY-MM-DD');
-            const formData = { ...userDetails, expiry_date: user_expiry_date, department: selectedDepartment, sla_expiry_date: sla_expiry_date };
+            const client_expiry_date = dayjs(clientExpiryDate).format('YYYY-MM-DD');
+            const formData = { ...userDetails, expiry_date: user_expiry_date, department: selectedDepartment, sla_expiry_date: sla_expiry_date, client_expiry_date: client_expiry_date };
 
             const endpoint = names === "create" ? '/v1/createUser' : '/v1/updateUser';
             const response = await makeApi('post', endpoint, formData);
@@ -287,6 +290,19 @@ const Create_Edit_form = () => {
                                                 value={userDetails.remark}
                                                 onChange={handleChange}
                                             />
+                                        </div>
+
+                                        <div className="col-lg-6 col-md-6 col-sm-12 mb-1 ">
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DemoContainer components={['DatePicker', 'DatePicker']}>
+                                                    <DatePicker label="Client Expiry Date" variant="outlined" className=' w-100 mb-4' format="DD-MM-YYYY"
+                                                        name='clientExpiryDate'
+                                                        id="clientExpiryDate"
+                                                        value={clientExpiryDate ? clientExpiryDate : null}
+                                                        onChange={(newValue) => setClientExpiryDate(newValue)}
+                                                    />
+                                                </DemoContainer>
+                                            </LocalizationProvider>
                                         </div>
 
                                         <div className="col-12 d-flex justify-content-center">

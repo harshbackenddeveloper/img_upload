@@ -42,7 +42,7 @@ const CreateLink = () => {
       setAllLinkDetails(allDetailsLiks.data)
       console.log("user link created list ", LinkList);
       if (LinkList.hasError == true) {
-        toast.error(LinkList.error.message)
+        // toast.error(LinkList.error.message)
       } else {
         setUser(LinkList.data)
       }
@@ -185,10 +185,10 @@ const CreateLink = () => {
                   <th scope="col">S.No</th>
                   <th scope="col">Link</th>
                   <th scope="col">URL</th>
+                  <th scope="col">Create Date</th>
                   <th scope="col">Expiry Date</th>
                   <th scope="col">Share</th>
                   <th scope="col">Show</th>
-                  <th scope="col">Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -197,21 +197,18 @@ const CreateLink = () => {
                     <th scope="row" >{index + 1}</th>
                     <td>{item.link_name}</td>
                     <td>{item.link_url}</td>
+                    <td>{ProperDateFormat({ dateString: item.created_at })}</td>
                     <td>{ProperDateFormat({ dateString: item.expiry_date })}</td>
-                    <td><button className='btn btn-success' onClick={() => {
-                      if (item.status === 0) { shareDocumentLink(item.id, item.link_url); }
-                    }}
-                      disabled={item.status !== 0}
-                    >
+                    <td><button className='btn btn-success' onClick={() => { if (item.status === 0) { shareDocumentLink(item.id, item.link_url); } }} disabled={item.status !== 0} >
                       {item.status === 0 ? "Share" : "Expired"}
                     </button>
                     </td>
-                    <td><button className='btn btn-warning' onClick={() => showDocument(item.id)}>Show</button></td>
-                    <td> {loading ? <Loader /> : <button className='btn btn-danger' onClick={() => deleteDocument(item.link_key)}>Delete</button>} </td>
+                    <td><button className='btn btn-warning' onClick={() => showDocument(item.id)} disabled={item.status === 0} >Show</button></td>
+                    {/* <td><button className='btn btn-warning' onClick={() => showDocument(item.id)}>Show</button></td> */}
                   </tr>
                 ))}
               </tbody>
-            </table>) : (<h1 style={{ color: "red", textAlign: 'center' }}>No Data available</h1>)}
+            </table>) : (<h1 style={{ color: "red", textAlign: 'center' }}>Welcome</h1>)}
           </div>
 
           {/* modal to show option for share  */}

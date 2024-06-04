@@ -62,17 +62,19 @@ const Userlogin = () => {
                                 <div className="card-body text-center">
                                     <h3 className="mb-4 fw-bold">User Sign in</h3>
 
-                                    <TextField label=" Email" variant="outlined" className='w-100 mb-3'
+                                    <TextField  variant="outlined" className='w-100 mb-3' placeholder='Email'
                                         name='email'
                                         id="email"
                                         value={formData.email}
                                         onChange={handleChange}
+                                        autoComplete="current-email"
                                     />
-                                    <TextField label="Password" variant="outlined" className='w-100 mb-4'  type='password'
+                                    <TextField placeholder="Password" variant="outlined" className='w-100 mb-4'  type='password'
                                         id="password"
                                         name='password'
                                         value={formData.password}
                                         onChange={handleChange}
+                                        autoComplete="current-password"
                                     />
                                     <div className='d-flex justify-content-end align-items-center flex-wrap'>
 
