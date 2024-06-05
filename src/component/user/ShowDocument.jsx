@@ -137,6 +137,7 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                 <th scope="col">Date/Time</th>
                                                 <th scope="col">Latitude</th>
                                                 <th scope="col">Longitude</th>
+                                                <th scope="col">Uploaded At</th>
                                                 <th scope="col">Downloaded At</th>
                                                 <th scope="col">Deleted At</th>
                                             </tr>
@@ -151,6 +152,7 @@ const ShowDocument = ({ open, handleClose, id }) => {
                                                     <th scope="row" >Date: {formatDate(item.created_at)}, Time: {formatTime(item.created_at)}</th>
                                                     <th scope="row" >{item.latitude}</th>
                                                     <th scope="row" >{item.longitude}</th>
+                                                    <th scope="row">Date: {formatDate(item.created_at)}, Time: {formatTime(item.created_at)}</th>
                                                     <th scope="row">{item.is_download === 1 ? `Date: ${formatDate(item.download_at)}, Time: ${formatTime(item.download_at)}` : ""}</th>
                                                     <th scope="row">{item.is_deleted === 1 ? `Date: ${formatDate(item.updated_at)}, Time: ${formatTime(item.updated_at)}` : ""}</th>
                                                 </tr>

@@ -1,9 +1,11 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
 
-function PrivateRoute({children}) {
-  const user = JSON.parse(localStorage.getItem('userData')) ;
-  return user ? children  : <Navigate to="/" />;
+function PrivateRoute({ children, navigate }) {
+  console.log("children", children)
+  const user = JSON.parse(sessionStorage.getItem("token"));
+  console.log("jfdklfdfdfd", user)
+  
+  return user ? children : <navigate to="/" />;
 }
 
 export default PrivateRoute;

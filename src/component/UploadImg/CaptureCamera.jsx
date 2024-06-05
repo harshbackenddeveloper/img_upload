@@ -96,7 +96,6 @@ const CaptureCamera = () => {
         getLocation();
     }, []);
 
-    
     return (
         <div>
             <h4 className='fw-bold  mt-5 ms-3'>Capture image  with camera </h4>
@@ -112,21 +111,24 @@ const CaptureCamera = () => {
                                     ...videoConstraints,
                                     facingMode
                                 }} />
-
-                            <div className='d-flex justify-content-end'>
-                                <button onClick={capture} className='btn btn-warning  mt-2 mb-2'>Capture Photo</button>
-                                {loading ? <Loader /> : <button onClick={uploadImg} className='btn btn-success ms-3 mt-2 mb-2'>Upload</button>}
-                            </div>
-                        </div>
-                        <div className='col-lg-6  col-md-12 col-12 imup-scrolling'>
-                            <div className=''>
-                                {capturedImages.map((file, index) => (
-                                    <img className='imupca-image' key={index} src={URL.createObjectURL(file)} alt={`Captured ${index + 1}`} />
-                                ))}
-                            </div>
-
                         </div>
                     </div>
+                    <div className='row'>
+                        <div className='col-lg-9 col-md-6 col-sm-12'>
+                            <div className=''>
+                                {capturedImages.map((file, index) => (
+                                    <img className='imupca-image me-3 mt-3' key={index} src={URL.createObjectURL(file)} alt={`Captured ${index + 1}`} />
+                                ))}
+                            </div>
+                        </div>
+                        <div className='d-flex mt-2'>
+                            <button onClick={capture} className='btn btn-warning  mt-2 mb-2'>Capture Photo</button>
+                            {loading ? <Loader /> : <button onClick={uploadImg} className='btn btn-success ms-3 mt-2 mb-2'>Upload</button>}
+                        </div>
+                    </div>  
+                    <div className='col-lg-6  col-md-12 col-12 imup-scrolling'>
+                    </div>
+                   
                 </div>) : (null)
                 }
             </div>

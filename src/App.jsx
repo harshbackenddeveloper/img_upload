@@ -1,5 +1,6 @@
-import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -19,19 +20,21 @@ import NotFound from './component/NotFound';
 function App() {
 
   const isAuthenticated = () => {
-
     const localData = sessionStorage.getItem("token")
     const userToken = JSON.parse(localData)
     return userToken;
   };
 
-  // Create a custom ProtectedRoute component
+  // Modified ProtectedRoute component
   const ProtectedRoute = ({ element, ...props }) => {
-    return isAuthenticated() ? (
-      element
-    ) : (
-      <Navigate to="/" replace state={{ from: props.location }} />
-    );
+    const navigate = useNavigate();
+    useEffect(() => {
+      if (!isAuthenticated()) {
+        navigate("/", { replace: true, state: { from: props.location } });
+      }
+    }, [navigate, props.location]);
+
+    return isAuthenticated() ? element : null;
   };
 
   return (
@@ -70,7 +73,6 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <ToastContainer />
     </>
   );
 }

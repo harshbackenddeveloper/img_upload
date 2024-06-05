@@ -12,10 +12,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import '../../assets/css/modal.css';
 import CloseIcon from '@mui/icons-material/Close';
-import { ProperDateFormat } from '../../helper/UserToken';
+import { ProperDateFormat, userlocalStorageData } from '../../helper/UserToken';
+import { useNavigate } from 'react-router-dom';
 
 const CreateLink = () => {
   const [user, setUser] = useState([]);
+  const navigate = useNavigate();
+  const userToken = userlocalStorageData().userToken
   const [loading, setLoading] = useState(false);
   const [selectedLinkURL, setSelectedLinkURL] = useState(''); // New state for selected link URL
 
@@ -68,27 +71,6 @@ const CreateLink = () => {
       });
   };
 
-  //function to delete link
-  const deleteDocument = async (link_key) => {
-    console.log("deleted link id", link_key)
-    setLoading(true)
-    try {
-      const deleteLink = await makeApi('post', `/v1/user/destroy/link`, { key: link_key });
-      if (deleteLink.hasError === 'true') {
-        toast.error(deleteLink.error.message);
-      } else {
-        const updatedUser = user.filter(item => item.link_key !== link_key);
-        setUser(updatedUser);
-        toast.success("Link delted successfully")
-        console.log("delte link", deleteLink);
-        getLinkList();
-      }
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   // these state is for creating link
   const [selectedDate, setSelectedDate] = useState(null);
@@ -105,6 +87,9 @@ const CreateLink = () => {
       console.log("createData", createData);
       if (createData.hasError === true) {
         toast.error(createData.error.message)
+        // if (createData.error.message === 'token exipre') {
+        //   navigate('/');
+        // }
       }
       else {
         toast.success("link created successfully")
@@ -167,7 +152,6 @@ const CreateLink = () => {
     <>
       {loading ? <Loader /> : (<div className='container pt-3'>
         <div className="card shadow border-1 p-3 mt-5 ">
-
           <div className='d-flex justify-content-between flex-wrap'>
             <div>
               <p className='mb-0 fs-5'>Link-limit : - {allLinkDetails.linkstatus}</p>
@@ -204,7 +188,6 @@ const CreateLink = () => {
                     </button>
                     </td>
                     <td><button className='btn btn-warning' onClick={() => showDocument(item.id)} disabled={item.status === 0} >Show</button></td>
-                    {/* <td><button className='btn btn-warning' onClick={() => showDocument(item.id)}>Show</button></td> */}
                   </tr>
                 ))}
               </tbody>
@@ -248,61 +231,72 @@ const CreateLink = () => {
           </Modal>
 
           {/* these popup is for showing images whichever user watnt to see */}
-          <div>
-            <ShowDocument
-              open={showImageModal}
-              handleClose={() => setShowImageModal(false)}
-              id={selectedDocId}
-            />
-          </div>
+          {userToken ? (
+            <div>
+              <ShowDocument
+                open={showImageModal}
+                handleClose={() => setShowImageModal(false)}
+                id={selectedDocId}
+              />
+            </div>
+          ) : navigate('/')}
 
-          <div>
-            <WhatsappShare
-              open={showWhatsApp}
-              handleCloseWhatsapp={() => setShowWhatsApp(false)}
-              id={selectedWhatsAppId}
-            />
-          </div>
+          {userToken ? (
+            <div>
+              <WhatsappShare
+                open={showWhatsApp}
+                handleCloseWhatsapp={() => setShowWhatsApp(false)}
+                id={selectedWhatsAppId}
+              />
+            </div>
+          ) : navigate('/')}
 
-          {/* modal creating link */}
-          <div>
-            <Modal open={openModalCreateLink} onClose={closeCreateLinkModal} >
-              <Box className="shadow border-0 rounded boxStyle">
-                <form onSubmit={createLink}>
-                  <div className="card-body text-center p-2 ">
-                    <div className='d-flex justify-content-between'>
-                      <h5 className='mb-3'>Create Link</h5>
-                      <CloseIcon style={{ color: 'red', cursor: 'pointer' }} onClick={() => closeCreateLinkModal()} />
+
+          {userToken ? (
+            <div>
+              <Modal open={openModalCreateLink} onClose={closeCreateLinkModal} >
+                <Box className="shadow border-0 rounded boxStyle">
+                  <form onSubmit={createLink}>
+                    <div className="card-body text-center p-2 ">
+                      <div className='d-flex justify-content-between'>
+                        <h5 className='mb-3'>Create Link</h5>
+                        <CloseIcon style={{ color: 'red', cursor: 'pointer' }} onClick={() => closeCreateLinkModal()} />
+                      </div>
+                      <TextField label="Link Name" variant="outlined" className=' w-100 mb-4 me-3'
+                        name='link_name'
+                        id="link_name"
+                        value={link_name}
+                        onChange={(e) => setLink_name(e.target.value)}
+                      />
+
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoContainer components={['DatePicker', 'DatePicker']}>
+                          <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4 me-3' format="DD-MM-YYYY"
+                            name='selectedDate'
+                            id="selectedDate"
+                            value={selectedDate ? selectedDate : null}
+                            onChange={(newValue) => setSelectedDate(newValue)}
+                          />
+                        </DemoContainer>
+                      </LocalizationProvider>
+
+                      <div className='d-flex justify-content-center'>
+                        {loading ? (<Loader />) : (<button className="btn btn-primary d-block" type="submit">Create link</button>)}
+                      </div>
                     </div>
-                    <TextField label="Link Name" variant="outlined" className=' w-100 mb-4 me-3'
-                      name='link_name'
-                      id="link_name"
-                      value={link_name}
-                      onChange={(e) => setLink_name(e.target.value)}
-                    />
+                  </form>
+                </Box>
+              </Modal>
+            </div>
+          ) : navigate('/')}
 
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DemoContainer components={['DatePicker', 'DatePicker']}>
-                        <DatePicker label="Expiry Date" variant="outlined" className=' w-100 mb-4 me-3' format="DD-MM-YYYY"
-                          name='selectedDate'
-                          id="selectedDate"
-                          value={selectedDate ? selectedDate : null}
-                          onChange={(newValue) => setSelectedDate(newValue)}
-                        />
-                      </DemoContainer>
-                    </LocalizationProvider>
 
-                    <div className='d-flex justify-content-center'>
-                      {loading ? (<Loader />) : (<button className="btn btn-primary d-block" type="submit">Create link</button>)}
-                    </div>
-                  </div>
-                </form>
-              </Box>
-            </Modal>
-          </div>
+
+
         </div>
 
-      </div>)}
+      </div >)
+      }
 
     </>
   )
